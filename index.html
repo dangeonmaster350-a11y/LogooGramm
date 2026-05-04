@@ -9,219 +9,104 @@
 <body>
     <div class="app" id="app">
         <!-- ЭКРАН АВТОРИЗАЦИИ -->
-        <div class="screen auth-screen active" id="authScreen">
+        <div class="screen auth-screen" id="authScreen">
             <div class="logo-container">
                 <div class="logo-3d">📱</div>
                 <h1>LogoGramm</h1>
                 <p>Телефонная версия</p>
             </div>
             <div class="auth-form">
-                <select id="countryCode" class="country-select">
-                    <option value="+7">🇷🇺 +7</option>
-                    <option value="+1">🇺🇸 +1</option>
-                    <option value="+44">🇬🇧 +44</option>
-                </select>
-                <input type="tel" id="phoneInput" placeholder="Номер телефона" class="input-field">
-                <input type="text" id="nicknameInput" placeholder="Ник (уникальный)" class="input-field">
-                <input type="text" id="nameInput" placeholder="Ваше имя" class="input-field">
-                <button id="registerBtn" class="btn-primary">➡️ Войти</button>
+                <input type="text" id="loginNickname" placeholder="Ник (уникальный)" class="input-field">
+                <input type="text" id="loginName" placeholder="Ваше имя" class="input-field">
+                <input type="tel" id="loginPhone" placeholder="Номер телефона" class="input-field">
+                <button id="registerBtn" class="btn-primary">➡️ Войти / Зарегистрироваться</button>
             </div>
         </div>
 
-        <!-- ОСНОВНОЙ ЭКРАН (ТЕЛЕФОННАЯ ВЕРСИЯ) -->
+        <!-- ОСНОВНОЙ ЭКРАН -->
         <div class="screen main-screen" id="mainScreen" style="display: none;">
-            <!-- Верхняя панель -->
             <div class="mobile-header">
-                <div class="header-left">
-                    <button id="menuToggleBtn" class="header-btn">☰</button>
-                </div>
+                <button id="menuToggleBtn" class="header-btn">☰</button>
                 <div class="header-title">LogoGramm</div>
-                <div class="header-right">
-                    <button id="newChatBtn" class="header-btn">✏️</button>
-                </div>
+                <button id="searchGlobalBtn" class="header-btn">🔍</button>
             </div>
 
-            <!-- Боковое меню (как в Telegram) -->
+            <!-- Боковое меню -->
             <div class="mobile-menu" id="mobileMenu">
                 <div class="menu-header">
                     <div class="menu-user-avatar" id="menuAvatar">👤</div>
                     <div class="menu-user-name" id="menuName"></div>
                     <div class="menu-user-nick" id="menuNick"></div>
-                    <div class="premium-badge" id="premiumBadge" style="display: none;">⭐ Premium</div>
                 </div>
                 <div class="menu-items">
                     <button class="menu-item" data-tab="chats">💬 Сообщения</button>
-                    <button class="menu-item" data-tab="stories">📸 Истории</button>
                     <button class="menu-item" data-tab="contacts">👥 Контакты</button>
-                    <button class="menu-item" data-tab="calls">📞 Звонки</button>
-                    <button class="menu-item" id="openProfileFromMenu">👤 Мой профиль</button>
-                    <button class="menu-item" id="openPremiumFromMenu">⭐ Logo Premium</button>
-                    <button class="menu-item logout-btn" id="logoutBtnMenu">🚪 Выйти</button>
+                    <button class="menu-item" id="openProfileBtn">👤 Мой профиль</button>
+                    <button class="menu-item" id="logoutBtn">🚪 Выйти</button>
                 </div>
+            </div>
+
+            <!-- Поисковая панель -->
+            <div class="search-panel" id="searchPanel" style="display: none;">
+                <div class="search-header">
+                    <button id="closeSearchBtn" class="back-btn">←</button>
+                    <input type="text" id="globalSearchInput" placeholder="Поиск по юзернейму..." class="search-input-full" autofocus>
+                </div>
+                <div id="globalSearchResults" class="global-search-results"></div>
             </div>
 
             <!-- Контент -->
-            <div class="mobile-content">
-                <!-- Вкладка Чаты -->
+            <div class="mobile-content" id="mobileContent">
                 <div class="tab-content active" id="chatsTab">
-                    <div class="search-bar">
-                        <input type="text" id="searchChats" placeholder="Поиск по нику..." class="search-input">
-                    </div>
                     <div class="chats-list" id="chatsList"></div>
                 </div>
-
-                <!-- Вкладка Истории -->
-                <div class="tab-content" id="storiesTab">
-                    <div class="stories-header">
-                        <button id="addStoryBtn" class="add-story-btn">➕ Моя история</button>
-                    </div>
-                    <div class="stories-list" id="storiesList"></div>
-                </div>
-
-                <!-- Вкладка Контакты -->
                 <div class="tab-content" id="contactsTab">
-                    <div class="search-bar">
-                        <input type="text" id="searchContacts" placeholder="Поиск по нику..." class="search-input">
-                    </div>
                     <div class="contacts-list" id="contactsList"></div>
-                </div>
-
-                <!-- Вкладка Звонки -->
-                <div class="tab-content" id="callsTab">
-                    <div class="calls-list" id="callsList">
-                        <div class="placeholder">История звонков будет здесь</div>
-                    </div>
                 </div>
             </div>
 
-            <!-- Область чата (открывается при выборе чата) -->
+            <!-- Область чата -->
             <div class="chat-view" id="chatView" style="display: none;">
                 <div class="chat-header-mobile">
                     <button id="closeChatBtn" class="back-btn">←</button>
                     <div class="chat-user-info">
                         <div class="chat-user-name" id="chatUserName"></div>
-                        <div class="chat-user-status" id="chatUserStatus"></div>
+                        <div class="chat-user-nick" id="chatUserNick"></div>
                     </div>
-                    <button id="chatInfoBtn" class="header-btn">ℹ️</button>
                 </div>
                 <div class="messages-area" id="messagesArea">
                     <div class="placeholder">Нет сообщений</div>
                 </div>
                 <div class="input-area-mobile">
-                    <button id="voiceMsgBtn" class="voice-msg-btn">🎤</button>
                     <input type="text" id="messageInput" placeholder="Сообщение..." class="message-input-mobile">
                     <button id="sendMsgBtn" class="send-btn-mobile">📤</button>
                 </div>
             </div>
         </div>
 
-        <!-- МОДАЛ ПРОФИЛЯ (ТОЧНАЯ КОПИЯ TELEGRAM) -->
+        <!-- МОДАЛ ПРОФИЛЯ -->
         <div class="modal" id="profileModal">
-            <div class="modal-content profile-modal-telegram">
+            <div class="modal-content profile-modal">
                 <div class="profile-header">
-                    <button class="close-modal-profile">←</button>
+                    <button class="close-profile">←</button>
                     <h3>Профиль</h3>
-                    <button id="editProfileBtn" class="edit-profile-btn">Редактировать</button>
                 </div>
                 <div class="profile-avatar-section">
-                    <div class="profile-big-avatar" id="profileBigAvatar">👤</div>
-                    <div class="profile-name-section">
-                        <div class="profile-display-name" id="profileDisplayName"></div>
-                        <div class="profile-username" id="profileUsername"></div>
-                    </div>
+                    <div class="profile-big-avatar" id="profileAvatar">👤</div>
                 </div>
-                <div class="profile-bio" id="profileBio"></div>
-                <div class="profile-stats">
-                    <div class="stat-item">
-                        <div class="stat-number" id="mutualCount">0</div>
-                        <div class="stat-label">взаимных</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number" id="groupCount">0</div>
-                        <div class="stat-label">групп</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number" id="phoneDisplay"></div>
-                        <div class="stat-label">телефон</div>
-                    </div>
+                <div class="profile-field">
+                    <label>Имя</label>
+                    <input type="text" id="profileNameInput" class="profile-input">
                 </div>
-                <div class="profile-actions">
-                    <button class="profile-action-btn" id="shareContactBtn">📤 Поделиться контактом</button>
-                    <button class="profile-action-btn" id="reportUserBtn">🚨 Пожаловаться</button>
+                <div class="profile-field">
+                    <label>Юзернейм</label>
+                    <input type="text" id="profileNicknameInput" class="profile-input">
                 </div>
-                <div class="profile-premium-section" id="profilePremiumSection">
-                    <div class="premium-banner">
-                        <span>⭐</span>
-                        <span>Logo Premium</span>
-                        <button id="openPremiumFromProfile">Оформить</button>
-                    </div>
+                <div class="profile-field">
+                    <label>О себе</label>
+                    <textarea id="profileBioInput" rows="3" class="profile-textarea"></textarea>
                 </div>
-            </div>
-        </div>
-
-        <!-- МОДАЛ PREMIUM (КАК В TELEGRAM) -->
-        <div class="modal" id="premiumModal">
-            <div class="modal-content premium-modal">
-                <div class="premium-header">
-                    <button class="close-premium">←</button>
-                    <h2>⭐ Logo Premium</h2>
-                </div>
-                <div class="premium-features">
-                    <div class="feature">✨ Эксклюзивные реакции</div>
-                    <div class="feature">📁 Загрузка файлов до 4 ГБ</div>
-                    <div class="feature">🎨 Кастомные темы</div>
-                    <div class="feature">🎤 Голосовые стикеры</div>
-                    <div class="feature">🖼️ HD качество медиа</div>
-                    <div class="feature">📊 Расширенная статистика</div>
-                </div>
-                <div class="premium-plans">
-                    <div class="plan-card" data-months="1">
-                        <div class="plan-price">100 ₽</div>
-                        <div class="plan-period">1 месяц</div>
-                        <button class="plan-btn">Купить</button>
-                    </div>
-                    <div class="plan-card" data-months="3">
-                        <div class="plan-price">300 ₽</div>
-                        <div class="plan-period">3 месяца</div>
-                        <div class="plan-save">Экономия 20%</div>
-                        <button class="plan-btn">Купить</button>
-                    </div>
-                    <div class="plan-card premium-best" data-months="12">
-                        <div class="plan-badge">🔥 Лучшее предложение</div>
-                        <div class="plan-price">700 ₽</div>
-                        <div class="plan-period">1 год</div>
-                        <div class="plan-save">Экономия 40%</div>
-                        <button class="plan-btn">Купить</button>
-                    </div>
-                </div>
-                <div class="premium-gift">
-                    <button class="gift-btn">🎁 Подарить Premium другу</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- МОДАЛ ДОБАВЛЕНИЯ СТОРИС -->
-        <div class="modal" id="storyModal">
-            <div class="modal-content story-modal">
-                <div class="story-header">
-                    <button class="close-story">←</button>
-                    <h3>Добавить историю</h3>
-                </div>
-                <textarea id="storyText" placeholder="Текст истории..." class="story-textarea" rows="4"></textarea>
-                <input type="color" id="storyBgColor" value="#667eea" class="story-color">
-                <div class="story-preview" id="storyPreview" style="background: #667eea;">
-                    <span id="previewText">Текст истории</span>
-                </div>
-                <button id="publishStoryBtn" class="btn-primary">Опубликовать</button>
-            </div>
-        </div>
-
-        <!-- ПРОСМОТР СТОРИС -->
-        <div class="story-viewer" id="storyViewer" style="display: none;">
-            <div class="story-viewer-content" id="storyViewerContent">
-                <button class="close-viewer">✕</button>
-                <div class="story-viewer-text" id="viewerText"></div>
-                <div class="story-viewer-info" id="viewerInfo"></div>
+                <button id="saveProfileChangesBtn" class="btn-primary">Сохранить</button>
             </div>
         </div>
     </div>
