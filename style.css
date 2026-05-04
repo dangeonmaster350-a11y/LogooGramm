@@ -1,0 +1,547 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background: #000;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.app {
+    width: 100%;
+    height: 100%;
+    background: #0f0f0f;
+}
+
+/* АВТОРИЗАЦИЯ */
+.auth-screen {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    padding: 20px;
+}
+
+.logo-container {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.logo-3d {
+    font-size: 80px;
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.logo-container h1 {
+    font-size: 42px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.auth-form {
+    width: 100%;
+    max-width: 350px;
+}
+
+.input-field {
+    width: 100%;
+    padding: 15px;
+    margin: 8px 0;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 12px;
+    color: white;
+    font-size: 16px;
+}
+
+.btn-primary {
+    width: 100%;
+    padding: 15px;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: bold;
+    margin-top: 10px;
+    cursor: pointer;
+}
+
+.info-text {
+    text-align: center;
+    color: #667eea;
+    font-size: 12px;
+    margin-top: 20px;
+}
+
+/* ТЕЛЕФОННАЯ ВЕРСИЯ */
+.main-screen {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    position: relative;
+}
+
+.mobile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: #1f1f1f;
+    border-bottom: 1px solid #2c2c2c;
+}
+
+.header-btn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: white;
+    cursor: pointer;
+    padding: 8px;
+}
+
+.header-title {
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* Боковое меню */
+.mobile-menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100%;
+    background: #1f1f1f;
+    z-index: 200;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.mobile-menu.open {
+    transform: translateX(0);
+}
+
+.menu-header {
+    padding: 30px 20px;
+    background: #2c2c2c;
+    text-align: center;
+}
+
+.menu-user-avatar {
+    width: 70px;
+    height: 70px;
+    background: #667eea;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    margin: 0 auto 10px;
+}
+
+.menu-user-name {
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.menu-user-nick {
+    color: #888;
+    font-size: 13px;
+}
+
+.menu-items {
+    flex: 1;
+    padding: 10px 0;
+}
+
+.menu-item {
+    width: 100%;
+    padding: 15px 20px;
+    background: none;
+    border: none;
+    color: white;
+    text-align: left;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.menu-item:hover {
+    background: #2c2c2c;
+}
+
+/* Поисковая панель */
+.search-panel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #0f0f0f;
+    z-index: 250;
+    display: flex;
+    flex-direction: column;
+}
+
+.search-header {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    background: #1f1f1f;
+    gap: 12px;
+}
+
+.search-input-full {
+    flex: 1;
+    padding: 12px;
+    background: #2c2c2c;
+    border: none;
+    border-radius: 25px;
+    color: white;
+    font-size: 16px;
+}
+
+.global-search-results {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+.search-result-user {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px;
+    background: #1f1f1f;
+    border-radius: 12px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.search-result-user:hover {
+    background: #2c2c2c;
+}
+
+.search-result-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+}
+
+.search-result-avatar {
+    width: 50px;
+    height: 50px;
+    background: #3a3a3a;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+.search-result-details {
+    flex: 1;
+}
+
+.search-result-name {
+    color: white;
+    font-weight: bold;
+}
+
+.search-result-nick {
+    color: #888;
+    font-size: 12px;
+}
+
+.write-btn {
+    background: #667eea;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+/* Контент */
+.mobile-content {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Списки */
+.chats-list, .contacts-list {
+    padding: 10px;
+}
+
+.chat-item, .contact-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    cursor: pointer;
+    border-radius: 12px;
+    transition: background 0.2s;
+}
+
+.chat-item:hover, .contact-item:hover {
+    background: #2c2c2c;
+}
+
+.chat-avatar, .contact-avatar {
+    width: 50px;
+    height: 50px;
+    background: #3a3a3a;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+.chat-info, .contact-info {
+    flex: 1;
+}
+
+.chat-name, .contact-name {
+    color: white;
+    font-weight: 500;
+}
+
+.chat-preview, .contact-nick {
+    color: #888;
+    font-size: 12px;
+}
+
+/* Область чата */
+.chat-view {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #121212;
+    z-index: 150;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-header-mobile {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    background: #1f1f1f;
+    gap: 12px;
+}
+
+.back-btn {
+    background: none;
+    border: none;
+    font-size: 28px;
+    color: white;
+    cursor: pointer;
+}
+
+.chat-user-info {
+    flex: 1;
+}
+
+.chat-user-name {
+    color: white;
+    font-size: 17px;
+    font-weight: bold;
+}
+
+.chat-user-nick {
+    color: #888;
+    font-size: 12px;
+}
+
+/* Сообщения */
+.messages-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.message {
+    max-width: 85%;
+    padding: 10px 14px;
+    border-radius: 18px;
+}
+
+.message-outgoing {
+    background: #667eea;
+    color: white;
+    align-self: flex-end;
+}
+
+.message-incoming {
+    background: #2c2c2c;
+    color: white;
+    align-self: flex-start;
+}
+
+.message-text {
+    word-wrap: break-word;
+}
+
+.message-time {
+    font-size: 10px;
+    opacity: 0.6;
+    margin-top: 4px;
+}
+
+/* Ввод сообщения */
+.input-area-mobile {
+    display: flex;
+    gap: 10px;
+    padding: 12px;
+    background: #1f1f1f;
+}
+
+.message-input-mobile {
+    flex: 1;
+    padding: 12px;
+    background: #2c2c2c;
+    border: none;
+    border-radius: 25px;
+    color: white;
+    font-size: 16px;
+}
+
+.send-btn-mobile {
+    width: 44px;
+    height: 44px;
+    background: #667eea;
+    border: none;
+    border-radius: 50%;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+/* Модал профиля */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.95);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 300;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-content {
+    background: #1f1f1f;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 400px;
+    padding: 20px;
+}
+
+.profile-modal {
+    padding: 0;
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    border-bottom: 1px solid #2c2c2c;
+    gap: 16px;
+}
+
+.close-profile {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: white;
+    cursor: pointer;
+}
+
+.profile-header h3 {
+    color: white;
+}
+
+.profile-avatar-section {
+    text-align: center;
+    padding: 20px;
+}
+
+.profile-big-avatar {
+    width: 100px;
+    height: 100px;
+    background: #667eea;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    margin: 0 auto;
+}
+
+.profile-field {
+    padding: 12px 16px;
+}
+
+.profile-field label {
+    display: block;
+    color: #888;
+    font-size: 12px;
+    margin-bottom: 5px;
+}
+
+.profile-input {
+    width: 100%;
+    padding: 12px;
+    background: #2c2c2c;
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 16px;
+}
+
+.placeholder {
+    text-align: center;
+    color: #666;
+    padding: 40px;
+}
