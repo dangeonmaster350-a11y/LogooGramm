@@ -1,87 +1,64 @@
-
 // ========== ГЛОБАЛЬНЫЕ ДАННЫЕ ==========
 let currentUser = null;
 let currentChat = null;
 let allUsers = [];
-let userChats = [];
-let stories = [];
-let premiumUsers = []; // ID пользователей с Premium
 
-// ========== ЗАГРУЗКА ДАННЫХ ==========
-function loadData() {
-    const storedUsers = localStorage.getItem('logogramm_users');
-    if (storedUsers) {
-        allUsers = JSON.parse(storedUsers);
-    } else {
-        allUsers = [
-            { id: 'user1', nickname: 'monke', name: 'Monke', phone: '+79991234567', bio: '🐒 Король обезьян', avatar: '🐒', online: true },
-            { id: 'user2', nickname: 'alex', name: 'Алексей', phone: '+79997654321', bio: 'Разработчик', avatar: '👨‍💻', online: false },
-            { id: 'user3', nickname: 'maria', name: 'Мария', phone: '+79991112233', bio: 'Дизайнер', avatar: '👩‍🎨', online: false }
-        ];
-        saveUsers();
-    }
-    
-    // Бесплатный Premium для monke на 1 год
-    const storedPremium = localStorage.getItem('logogramm_premium');
-    if (storedPremium) {
-        premiumUsers = JSON.parse(storedPremium);
-    } else {
-        // Даём Premium пользователю monke
-        const monkeUser = allUsers.find(u => u.nickname === 'monke');
-        if (monkeUser) {
-            premiumUsers.push({
-                userId: monkeUser.id,
-                expiresAt: Date.now() + 365 * 24 * 60 * 60 * 1000 // 1 год
-            });
+// ========== ЗАГРУЗКА СОХРАНЁННОГО АККАУНТА ==========
+function loadSavedUser() {
+    const savedUser = localStorage.getItem('logogramm_currentUser');
+    if (savedUser) {
+        currentUser = JSON.parse(savedUser);
+        
+        // Загружаем всех пользователей
+        const storedUsers = localStorage.getItem('logogramm_allUsers');
+        if (storedUsers) {
+            allUsers = JSON.parse(storedUsers);
+        } else {
+            allUsers = [];
         }
-        savePremium();
+        
+        // Обновляем данные текущего пользователя в allUsers
+        const userInList = allUsers.find(u => u.id === currentUser.id);
+        if (userInList) {
+            currentUser = userInList;
+        } else {
+            allUsers.push(currentUser);
+            saveAllUsers();
+        }
+        
+        // Показываем главный экран
+        document.getElementById('authScreen').style.display = 'none';
+        document.getElementById('mainScreen').style.display = 'flex';
+        updateUI();
+        renderChatsList();
+        renderContactsList();
     }
-    
-    const storedStories = localStorage.getItem('logogramm_stories');
-    if (storedStories) {
-        stories = JSON.parse(storedStories);
-    }
 }
 
-function saveUsers() {
-    localStorage.setItem('logogramm_users', JSON.stringify(allUsers));
+function saveCurrentUser() {
+    localStorage.setItem('logogramm_currentUser', JSON.stringify(currentUser));
 }
 
-function savePremium() {
-    localStorage.setItem('logogramm_premium', JSON.stringify(premiumUsers));
-}
-
-function saveStories() {
-    localStorage.setItem('logogramm_stories', JSON.stringify(stories));
-}
-
-// Проверка Premium
-function hasPremium(userId) {
-    const premium = premiumUsers.find(p => p.userId === userId);
-    if (!premium) return false;
-    if (premium.expiresAt < Date.now()) {
-        premiumUsers = premiumUsers.filter(p => p.userId !== userId);
-        savePremium();
-        return false;
-    }
-    return true;
+function saveAllUsers() {
+    localStorage.setItem('logogramm_allUsers', JSON.stringify(allUsers));
 }
 
 // ========== АВТОРИЗАЦИЯ ==========
 function setupAuth() {
     document.getElementById('registerBtn').onclick = () => {
-        const phone = document.getElementById('phoneInput').value;
-        const nickname = document.getElementById('nicknameInput').value.trim();
-        const name = document.getElementById('nameInput').value.trim();
+        const nickname = document.getElementById('loginNickname').value.trim();
+        const name = document.getElementById('loginName').value.trim();
+        const phone = document.getElementById('loginPhone').value.trim();
         
-        if (!phone || !nickname || !name) {
+        if (!nickname || !name || !phone) {
             alert('Заполните все поля');
             return;
         }
         
-        let existing = allUsers.find(u => u.nickname === nickname);
+        // Проверяем уникальность ника
+        const existing = allUsers.find(u => u.nickname === nickname);
         if (existing) {
-            alert('Ник уже занят');
+            alert('Этот ник уже занят!');
             return;
         }
         
@@ -91,42 +68,31 @@ function setupAuth() {
             name: name,
             phone: phone,
             bio: 'Привет! Я в LogoGramm',
-            avatar: '👤',
-            online: true
+            avatar: '👤'
         };
+        
         allUsers.push(currentUser);
-        saveUsers();
+        saveAllUsers();
+        saveCurrentUser();
         
         document.getElementById('authScreen').style.display = 'none';
         document.getElementById('mainScreen').style.display = 'flex';
-        
         updateUI();
         renderChatsList();
         renderContactsList();
-        renderStories();
-        
-        updateOnlineStatus();
-        setInterval(() => updateOnlineStatus(), 30000);
     };
 }
 
+// ========== ОБНОВЛЕНИЕ UI ==========
 function updateUI() {
+    if (!currentUser) return;
     document.getElementById('menuName').innerText = currentUser.name;
     document.getElementById('menuNick').innerText = '@' + currentUser.nickname;
-    document.getElementById('menuAvatar').innerText = currentUser.avatar;
-    document.getElementById('profileDisplayName').innerText = currentUser.name;
-    document.getElementById('profileUsername').innerText = '@' + currentUser.nickname;
-    document.getElementById('profileBio').innerText = currentUser.bio || '';
-    document.getElementById('phoneDisplay').innerText = currentUser.phone;
-    
-    const hasPremiumStatus = hasPremium(currentUser.id);
-    if (hasPremiumStatus) {
-        document.getElementById('premiumBadge').style.display = 'inline-block';
-        document.getElementById('profilePremiumSection').style.display = 'block';
-    } else {
-        document.getElementById('premiumBadge').style.display = 'none';
-        document.getElementById('profilePremiumSection').style.display = 'block';
-    }
+    document.getElementById('menuAvatar').innerText = currentUser.avatar || '👤';
+    document.getElementById('profileAvatar').innerText = currentUser.avatar || '👤';
+    document.getElementById('profileNameInput').value = currentUser.name;
+    document.getElementById('profileNicknameInput').value = currentUser.nickname;
+    document.getElementById('profileBioInput').value = currentUser.bio || '';
 }
 
 // ========== МЕНЮ ==========
@@ -144,23 +110,25 @@ function setupMenu() {
         };
     });
     
-    document.getElementById('openProfileFromMenu').onclick = () => {
+    document.getElementById('openProfileBtn').onclick = () => {
         document.getElementById('profileModal').classList.add('active');
         document.getElementById('mobileMenu').classList.remove('open');
     };
     
-    document.getElementById('openPremiumFromMenu').onclick = () => {
-        document.getElementById('premiumModal').classList.add('active');
-        document.getElementById('mobileMenu').classList.remove('open');
+    document.getElementById('logoutBtn').onclick = () => {
+        if (confirm('Выйти из аккаунта?')) {
+            localStorage.removeItem('logogramm_currentUser');
+            currentUser = null;
+            document.getElementById('mainScreen').style.display = 'none';
+            document.getElementById('authScreen').style.display = 'flex';
+            document.getElementById('mobileMenu').classList.remove('open');
+            document.getElementById('loginNickname').value = '';
+            document.getElementById('loginName').value = '';
+            document.getElementById('loginPhone').value = '';
+        }
     };
     
-    document.getElementById('logoutBtnMenu').onclick = () => {
-        currentUser = null;
-        document.getElementById('mainScreen').style.display = 'none';
-        document.getElementById('authScreen').style.display = 'flex';
-        document.getElementById('mobileMenu').classList.remove('open');
-    };
-    
+    // Закрытие меню при клике вне
     document.addEventListener('click', (e) => {
         const menu = document.getElementById('mobileMenu');
         if (menu.classList.contains('open') && !menu.contains(e.target) && !document.getElementById('menuToggleBtn').contains(e.target)) {
@@ -171,176 +139,141 @@ function setupMenu() {
 
 // ========== ПРОФИЛЬ ==========
 function setupProfile() {
-    document.querySelectorAll('.close-modal-profile, .close-premium, .close-story').forEach(btn => {
-        btn.onclick = () => {
-            document.getElementById('profileModal').classList.remove('active');
-            document.getElementById('premiumModal').classList.remove('active');
-            document.getElementById('storyModal').classList.remove('active');
-        };
-    });
+    document.querySelector('.close-profile').onclick = () => {
+        document.getElementById('profileModal').classList.remove('active');
+    };
     
-    document.getElementById('editProfileBtn').onclick = () => {
-        const newName = prompt('Новое имя:', currentUser.name);
-        const newBio = prompt('О себе:', currentUser.bio);
-        if (newName) currentUser.name = newName;
-        if (newBio) currentUser.bio = newBio;
+    document.getElementById('saveProfileChangesBtn').onclick = () => {
+        const newName = document.getElementById('profileNameInput').value;
+        const newNickname = document.getElementById('profileNicknameInput').value.trim();
+        const newBio = document.getElementById('profileBioInput').value;
+        
+        // Проверка уникальности ника
+        if (newNickname !== currentUser.nickname) {
+            const existing = allUsers.find(u => u.nickname === newNickname && u.id !== currentUser.id);
+            if (existing) {
+                alert('Этот ник уже занят!');
+                return;
+            }
+        }
+        
+        currentUser.name = newName;
+        currentUser.nickname = newNickname;
+        currentUser.bio = newBio;
+        
+        // Обновляем в общем списке
+        const userInList = allUsers.find(u => u.id === currentUser.id);
+        if (userInList) {
+            userInList.name = newName;
+            userInList.nickname = newNickname;
+            userInList.bio = newBio;
+        }
+        
+        saveAllUsers();
+        saveCurrentUser();
         updateUI();
         renderChatsList();
-    };
-    
-    document.getElementById('openPremiumFromProfile').onclick = () => {
+        renderContactsList();
         document.getElementById('profileModal').classList.remove('active');
-        document.getElementById('premiumModal').classList.add('active');
+        alert('Профиль обновлён!');
     };
 }
 
-// ========== PREMIUM ==========
-function setupPremium() {
-    // Бесплатный Premium для monke
-    const monkeUser = allUsers.find(u => u.nickname === 'monke');
-    if (monkeUser && currentUser?.id === monkeUser.id) {
-        if (!hasPremium(monkeUser.id)) {
-            premiumUsers.push({
-                userId: monkeUser.id,
-                expiresAt: Date.now() + 365 * 24 * 60 * 60 * 1000
-            });
-            savePremium();
-            updateUI();
-        }
-    }
+// ========== ГЛОБАЛЬНЫЙ ПОИСК ПО ЮЗЕРНЕЙМУ ==========
+function setupGlobalSearch() {
+    const searchBtn = document.getElementById('searchGlobalBtn');
+    const searchPanel = document.getElementById('searchPanel');
+    const closeSearchBtn = document.getElementById('closeSearchBtn');
+    const searchInput = document.getElementById('globalSearchInput');
+    const resultsDiv = document.getElementById('globalSearchResults');
     
-    document.querySelectorAll('.plan-card').forEach(card => {
-        card.onclick = () => {
-            const months = parseInt(card.dataset.months);
-            let price = 0;
-            if (months === 1) price = 100;
-            else if (months === 3) price = 300;
-            else price = 700;
-            
-            if (confirm(`Оформить Logo Premium на ${months} мес. за ${price}₽?`)) {
-                const existing = premiumUsers.find(p => p.userId === currentUser.id);
-                if (existing) {
-                    existing.expiresAt += months * 30 * 24 * 60 * 60 * 1000;
-                } else {
-                    premiumUsers.push({
-                        userId: currentUser.id,
-                        expiresAt: Date.now() + months * 30 * 24 * 60 * 60 * 1000
-                    });
-                }
-                savePremium();
-                updateUI();
-                alert('Premium оформлен! Спасибо за покупку 🎉');
-                document.getElementById('premiumModal').classList.remove('active');
-            }
-        };
-    });
-}
-
-// ========== СТОРИС ==========
-function setupStories() {
-    document.getElementById('addStoryBtn').onclick = () => {
-        document.getElementById('storyModal').classList.add('active');
+    searchBtn.onclick = () => {
+        searchPanel.style.display = 'flex';
+        searchInput.focus();
     };
     
-    document.getElementById('storyText').oninput = () => {
-        document.getElementById('previewText').innerText = document.getElementById('storyText').value || 'Текст истории';
+    closeSearchBtn.onclick = () => {
+        searchPanel.style.display = 'none';
+        searchInput.value = '';
+        resultsDiv.innerHTML = '';
     };
     
-    document.getElementById('storyBgColor').onchange = () => {
-        document.getElementById('storyPreview').style.background = document.getElementById('storyBgColor').value;
-    };
-    
-    document.getElementById('publishStoryBtn').onclick = () => {
-        const text = document.getElementById('storyText').value;
-        const bgColor = document.getElementById('storyBgColor').value;
+    searchInput.oninput = () => {
+        const query = searchInput.value.toLowerCase().trim();
         
-        if (!text) {
-            alert('Введите текст истории');
+        if (query.length === 0) {
+            resultsDiv.innerHTML = '';
             return;
         }
         
-        stories.push({
-            id: Date.now(),
-            userId: currentUser.id,
-            userName: currentUser.name,
-            userAvatar: currentUser.avatar,
-            text: text,
-            bgColor: bgColor,
-            timestamp: Date.now()
-        });
-        saveStories();
-        renderStories();
-        document.getElementById('storyModal').classList.remove('active');
-        document.getElementById('storyText').value = '';
-    };
-}
-
-function renderStories() {
-    const container = document.getElementById('storiesList');
-    const myStories = stories.filter(s => s.userId === currentUser?.id);
-    const otherStories = stories.filter(s => s.userId !== currentUser?.id);
-    const allStories = [...myStories, ...otherStories];
-    
-    if (allStories.length === 0) {
-        container.innerHTML = '<div class="placeholder">Нет историй. Добавьте первую!</div>';
-        return;
-    }
-    
-    container.innerHTML = allStories.map(story => `
-        <div class="story-item" data-story-id="${story.id}">
-            <div class="story-author">
-                <div class="story-author-avatar">${story.userAvatar || '👤'}</div>
-                <div>
-                    <div class="story-author-name">${story.userName}</div>
-                    <div class="story-text">${story.text.substring(0, 50)}${story.text.length > 50 ? '...' : ''}</div>
+        // Ищем пользователей (кроме себя)
+        const matches = allUsers.filter(u => 
+            u.id !== currentUser?.id && 
+            (u.nickname.toLowerCase().includes(query) || u.name.toLowerCase().includes(query))
+        );
+        
+        if (matches.length === 0) {
+            resultsDiv.innerHTML = '<div class="placeholder">Пользователи не найдены</div>';
+            return;
+        }
+        
+        resultsDiv.innerHTML = matches.map(user => `
+            <div class="search-result-user" data-user-id="${user.id}">
+                <div class="search-result-avatar">${user.avatar || '👤'}</div>
+                <div class="search-result-info">
+                    <div class="search-result-name">${user.name}</div>
+                    <div class="search-result-nick">@${user.nickname}</div>
                 </div>
             </div>
-            <div class="story-time">${new Date(story.timestamp).toLocaleTimeString()}</div>
-        </div>
-    `).join('');
-    
-    document.querySelectorAll('.story-item').forEach(el => {
-        el.onclick = () => {
-            const storyId = parseInt(el.dataset.storyId);
-            const story = stories.find(s => s.id === storyId);
-            if (story) {
-                document.getElementById('viewerText').innerText = story.text;
-                document.getElementById('storyViewerContent').style.background = story.bgColor;
-                document.getElementById('storyViewer').style.display = 'flex';
-                document.getElementById('viewerInfo').innerHTML = `${story.userName} • ${new Date(story.timestamp).toLocaleString()}`;
-            }
-        };
-    });
-    
-    document.querySelector('.close-viewer').onclick = () => {
-        document.getElementById('storyViewer').style.display = 'none';
+        `).join('');
+        
+        document.querySelectorAll('.search-result-user').forEach(el => {
+            el.onclick = () => {
+                const userId = el.dataset.userId;
+                const user = allUsers.find(u => u.id === userId);
+                if (user) {
+                    searchPanel.style.display = 'none';
+                    searchInput.value = '';
+                    openChat(user);
+                }
+            };
+        });
     };
 }
 
-// ========== ЧАТЫ ==========
+// ========== ОТОБРАЖЕНИЕ ЧАТОВ И КОНТАКТОВ ==========
 function renderChatsList() {
     const container = document.getElementById('chatsList');
     const otherUsers = allUsers.filter(u => u.id !== currentUser?.id);
     
     if (otherUsers.length === 0) {
-        container.innerHTML = '<div class="placeholder">Нет контактов</div>';
+        container.innerHTML = '<div class="placeholder">Нет контактов. Найдите пользователей через поиск 🔍</div>';
         return;
     }
     
-    container.innerHTML = otherUsers.map(user => `
-        <div class="chat-item" data-user-id="${user.id}">
-            <div class="chat-avatar">${user.avatar || '👤'}</div>
-            <div class="chat-info">
-                <div class="chat-name">${user.name} ${hasPremium(user.id) ? '⭐' : ''}</div>
-                <div class="chat-preview">@${user.nickname}</div>
+    container.innerHTML = otherUsers.map(user => {
+        // Получаем последнее сообщение
+        const chatKey = getChatKey(currentUser.id, user.id);
+        const messages = getMessages(chatKey);
+        const lastMsg = messages[messages.length - 1];
+        const preview = lastMsg ? (lastMsg.senderId === currentUser.id ? `Вы: ${lastMsg.text}` : lastMsg.text) : 'Нет сообщений';
+        
+        return `
+            <div class="chat-item" data-user-id="${user.id}">
+                <div class="chat-avatar">${user.avatar || '👤'}</div>
+                <div class="chat-info">
+                    <div class="chat-name">${user.name}</div>
+                    <div class="chat-preview">${preview.substring(0, 40)}</div>
+                </div>
             </div>
-        </div>
-    `).join('');
+        `;
+    }).join('');
     
     document.querySelectorAll('.chat-item').forEach(el => {
         el.onclick = () => {
             const userId = el.dataset.userId;
-            openChat(userId);
+            const user = allUsers.find(u => u.id === userId);
+            if (user) openChat(user);
         };
     });
 }
@@ -348,6 +281,11 @@ function renderChatsList() {
 function renderContactsList() {
     const container = document.getElementById('contactsList');
     const otherUsers = allUsers.filter(u => u.id !== currentUser?.id);
+    
+    if (otherUsers.length === 0) {
+        container.innerHTML = '<div class="placeholder">Нет контактов</div>';
+        return;
+    }
     
     container.innerHTML = otherUsers.map(user => `
         <div class="contact-item" data-user-id="${user.id}">
@@ -362,37 +300,51 @@ function renderContactsList() {
     document.querySelectorAll('.contact-item').forEach(el => {
         el.onclick = () => {
             const userId = el.dataset.userId;
-            openChat(userId);
+            const user = allUsers.find(u => u.id === userId);
+            if (user) openChat(user);
         };
     });
 }
 
-function openChat(userId) {
-    const otherUser = allUsers.find(u => u.id === userId);
-    if (!otherUser) return;
-    
-    currentChat = otherUser;
-    document.getElementById('chatUserName').innerText = otherUser.name;
-    document.getElementById('chatUserStatus').innerHTML = otherUser.online ? '🟢 онлайн' : '⚫ не в сети';
+// ========== РАБОТА С СООБЩЕНИЯМИ ==========
+function getChatKey(userId1, userId2) {
+    // Сортируем ID для уникального ключа чата
+    const ids = [userId1, userId2].sort();
+    return `chat_${ids[0]}_${ids[1]}`;
+}
+
+function getMessages(chatKey) {
+    const stored = localStorage.getItem(chatKey);
+    return stored ? JSON.parse(stored) : [];
+}
+
+function saveMessages(chatKey, messages) {
+    localStorage.setItem(chatKey, JSON.stringify(messages));
+}
+
+function openChat(user) {
+    currentChat = user;
+    document.getElementById('chatUserName').innerText = user.name;
+    document.getElementById('chatUserNick').innerText = '@' + user.nickname;
     document.getElementById('chatView').style.display = 'flex';
     document.getElementById('mobileContent').style.display = 'none';
-    
     renderMessages();
 }
 
 function renderMessages() {
     const container = document.getElementById('messagesArea');
-    const chatKey = `chat_${currentUser?.id}_${currentChat?.id}`;
-    const stored = localStorage.getItem(chatKey);
-    const messages = stored ? JSON.parse(stored) : [];
+    if (!currentChat) return;
+    
+    const chatKey = getChatKey(currentUser.id, currentChat.id);
+    const messages = getMessages(chatKey);
     
     if (messages.length === 0) {
-        container.innerHTML = '<div class="placeholder">Напишите первое сообщение</div>';
+        container.innerHTML = '<div class="placeholder">Напишите первое сообщение ✨</div>';
         return;
     }
     
     container.innerHTML = messages.map(msg => `
-        <div class="message ${msg.senderId === currentUser?.id ? 'message-outgoing' : 'message-incoming'}">
+        <div class="message ${msg.senderId === currentUser.id ? 'message-outgoing' : 'message-incoming'}">
             <div class="message-text">${escapeHtml(msg.text)}</div>
             <div class="message-time">${new Date(msg.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
         </div>
@@ -403,30 +355,26 @@ function renderMessages() {
 
 function sendMessage() {
     const input = document.getElementById('messageInput');
-    if (!input.value.trim() || !currentChat) return;
+    const text = input.value.trim();
+    
+    if (!text || !currentChat) return;
     
     const msg = {
         id: Date.now(),
-        text: input.value,
+        text: text,
         senderId: currentUser.id,
+        senderName: currentUser.name,
         timestamp: Date.now()
     };
     
-    const chatKey = `chat_${currentUser.id}_${currentChat.id}`;
-    const stored = localStorage.getItem(chatKey);
-    const messages = stored ? JSON.parse(stored) : [];
+    const chatKey = getChatKey(currentUser.id, currentChat.id);
+    const messages = getMessages(chatKey);
     messages.push(msg);
-    localStorage.setItem(chatKey, JSON.stringify(messages));
-    
-    // Сохраняем и для другого пользователя
-    const chatKey2 = `chat_${currentChat.id}_${currentUser.id}`;
-    const stored2 = localStorage.getItem(chatKey2);
-    const messages2 = stored2 ? JSON.parse(stored2) : [];
-    messages2.push(msg);
-    localStorage.setItem(chatKey2, JSON.stringify(messages2));
+    saveMessages(chatKey, msg);
     
     input.value = '';
     renderMessages();
+    renderChatsList(); // Обновляем превью в списке чатов
 }
 
 function escapeHtml(text) {
@@ -435,67 +383,13 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-// ========== ОНЛАЙН СТАТУС ==========
-function updateOnlineStatus() {
-    if (!currentUser) return;
-    const userInList = allUsers.find(u => u.id === currentUser.id);
-    if (userInList) {
-        userInList.online = true;
-        saveUsers();
-    }
-}
-
-// ========== ПОИСК ==========
-function setupSearch() {
-    document.getElementById('searchChats').oninput = (e) => {
-        const query = e.target.value.toLowerCase();
-        const filtered = allUsers.filter(u => u.id !== currentUser?.id && 
-            (u.nickname.toLowerCase().includes(query) || u.name.toLowerCase().includes(query)));
-        
-        const container = document.getElementById('chatsList');
-        container.innerHTML = filtered.map(user => `
-            <div class="chat-item" data-user-id="${user.id}">
-                <div class="chat-avatar">${user.avatar || '👤'}</div>
-                <div class="chat-info">
-                    <div class="chat-name">${user.name}</div>
-                    <div class="chat-preview">@${user.nickname}</div>
-                </div>
-            </div>
-        `).join('');
-        
-        document.querySelectorAll('.chat-item').forEach(el => {
-            el.onclick = () => openChat(el.dataset.userId);
-        });
-    };
-    
-    document.getElementById('searchContacts').oninput = (e) => {
-        const query = e.target.value.toLowerCase();
-        const filtered = allUsers.filter(u => u.id !== currentUser?.id && 
-            (u.nickname.toLowerCase().includes(query) || u.name.toLowerCase().includes(query)));
-        
-        const container = document.getElementById('contactsList');
-        container.innerHTML = filtered.map(user => `
-            <div class="contact-item" data-user-id="${user.id}">
-                <div class="contact-avatar">${user.avatar || '👤'}</div>
-                <div class="contact-info">
-                    <div class="contact-name">${user.name}</div>
-                    <div class="contact-nick">@${user.nickname}</div>
-                </div>
-            </div>
-        `).join('');
-        
-        document.querySelectorAll('.contact-item').forEach(el => {
-            el.onclick = () => openChat(el.dataset.userId);
-        });
-    };
-}
-
 // ========== ЗАКРЫТИЕ ЧАТА ==========
 function setupChatClose() {
     document.getElementById('closeChatBtn').onclick = () => {
         document.getElementById('chatView').style.display = 'none';
         document.getElementById('mobileContent').style.display = 'block';
         currentChat = null;
+        renderChatsList();
     };
     
     document.getElementById('sendMsgBtn').onclick = sendMessage;
@@ -506,12 +400,10 @@ function setupChatClose() {
 
 // ========== ИНИЦИАЛИЗАЦИЯ ==========
 document.addEventListener('DOMContentLoaded', () => {
-    loadData();
+    loadSavedUser();
     setupAuth();
     setupMenu();
     setupProfile();
-    setupPremium();
-    setupStories();
-    setupSearch();
+    setupGlobalSearch();
     setupChatClose();
 });
