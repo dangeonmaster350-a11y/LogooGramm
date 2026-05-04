@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>LogoGramm — Живой мессенджер</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app" id="app">
+        <!-- ЭКРАН АВТОРИЗАЦИИ -->
+        <div class="screen auth-screen" id="authScreen">
+            <div class="logo-container">
+                <div class="logo-3d">📱</div>
+                <h1>LogoGramm</h1>
+                <p>Сообщения доходят мгновенно!</p>
+            </div>
+            <div class="auth-form">
+                <input type="text" id="loginNickname" placeholder="Ник (например: alex, maria)" class="input-field">
+                <input type="text" id="loginName" placeholder="Ваше имя" class="input-field">
+                <button id="registerBtn" class="btn-primary">➡️ Войти</button>
+            </div>
+            <div class="info-text">✨ Откройте две вкладки с разными никами — сообщения будут приходить!</div>
+        </div>
+
+        <!-- ОСНОВНОЙ ЭКРАН -->
+        <div class="screen main-screen" id="mainScreen" style="display: none;">
+            <div class="mobile-header">
+                <button id="menuToggleBtn" class="header-btn">☰</button>
+                <div class="header-title">LogoGramm</div>
+                <button id="searchGlobalBtn" class="header-btn">🔍 Поиск</button>
+            </div>
+
+            <!-- Боковое меню -->
+            <div class="mobile-menu" id="mobileMenu">
+                <div class="menu-header">
+                    <div class="menu-user-avatar" id="menuAvatar">👤</div>
+                    <div class="menu-user-name" id="menuName"></div>
+                    <div class="menu-user-nick" id="menuNick"></div>
+                </div>
+                <div class="menu-items">
+                    <button class="menu-item" data-tab="chats">💬 Чаты</button>
+                    <button class="menu-item" data-tab="contacts">👥 Все пользователи</button>
+                    <button class="menu-item" id="openProfileBtn">👤 Мой профиль</button>
+                    <button class="menu-item" id="logoutBtn">🚪 Выйти</button>
+                </div>
+            </div>
+
+            <!-- Поисковая панель -->
+            <div class="search-panel" id="searchPanel" style="display: none;">
+                <div class="search-header">
+                    <button id="closeSearchBtn" class="back-btn">←</button>
+                    <input type="text" id="globalSearchInput" placeholder="Введите имя или ник..." class="search-input-full" autofocus>
+                </div>
+                <div id="globalSearchResults" class="global-search-results"></div>
+            </div>
+
+            <!-- Контент -->
+            <div class="mobile-content" id="mobileContent">
+                <div class="tab-content active" id="chatsTab">
+                    <div class="chats-list" id="chatsList"></div>
+                </div>
+                <div class="tab-content" id="contactsTab">
+                    <div class="contacts-list" id="contactsList"></div>
+                </div>
+            </div>
+
+            <!-- Область чата -->
+            <div class="chat-view" id="chatView" style="display: none;">
+                <div class="chat-header-mobile">
+                    <button id="closeChatBtn" class="back-btn">←</button>
+                    <div class="chat-user-info">
+                        <div class="chat-user-name" id="chatUserName"></div>
+                        <div class="chat-user-nick" id="chatUserNick"></div>
+                    </div>
+                </div>
+                <div class="messages-area" id="messagesArea">
+                    <div class="placeholder">Нет сообщений</div>
+                </div>
+                <div class="input-area-mobile">
+                    <input type="text" id="messageInput" placeholder="Сообщение..." class="message-input-mobile">
+                    <button id="sendMsgBtn" class="send-btn-mobile">📤</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- МОДАЛ ПРОФИЛЯ -->
+        <div class="modal" id="profileModal">
+            <div class="modal-content profile-modal">
+                <div class="profile-header">
+                    <button class="close-profile">←</button>
+                    <h3>Мой профиль</h3>
+                </div>
+                <div class="profile-avatar-section">
+                    <div class="profile-big-avatar" id="profileAvatar">👤</div>
+                </div>
+                <div class="profile-field">
+                    <label>Имя</label>
+                    <input type="text" id="profileNameInput" class="profile-input">
+                </div>
+                <div class="profile-field">
+                    <label>Юзернейм</label>
+                    <input type="text" id="profileNicknameInput" class="profile-input">
+                </div>
+                <button id="saveProfileChangesBtn" class="btn-primary">Сохранить</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
